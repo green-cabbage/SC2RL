@@ -19,7 +19,10 @@ total_steps = 10000
 steps_for_pun = np.linspace(0, 1, total_steps)
 step_punishment = ((np.exp(steps_for_pun**3)/10) - 0.1)*10
 
-
+# map name to train on
+map_name ="KingsCoveLE"
+map_shape = (176, 176, 3) # map shape for KingsCoveLE
+# map_shape = (224, 224, 3) # map shape for 2000AtmospheresAIE
 
 class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
     async def on_step(self, iteration: int): # on_step is a method that is called every step of the game.
@@ -324,7 +327,8 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
 
 
 result = run_game(  # run_game is a function that runs the game.
-    maps.get("2000AtmospheresAIE"), # the map we are playing on
+    maps.get(map_name),
+    # maps.get("2000AtmospheresAIE"), # the map we are playing on
     [Bot(Race.Protoss, IncrediBot()), # runs our coded bot, protoss race, and we pass our bot object 
      Computer(Race.Zerg, Difficulty.Hard)], # runs a pre-made computer agent, zerg race, with a hard difficulty.
     realtime=False, # When set to True, the agent is limited in how long each step can take to process.
@@ -340,7 +344,7 @@ with open("results.txt","a") as f:
     f.write(f"{result}\n")
 
 
-map = np.zeros((224, 224, 3), dtype=np.uint8)
+map = np.zeros(map_shape, dtype=np.uint8)
 observation = map
 data = {"state": map, "reward": rwd, "action": None, "done": True}  # empty action waiting for the next one!
 with open('state_rwd_action.pkl', 'wb') as f:

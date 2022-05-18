@@ -5,15 +5,19 @@ import subprocess
 import pickle
 import time
 import os
+# from incredibot_sct import main
+
 
 class Sc2Env(gym.Env):
 	"""Custom Environment that follows gym interface"""
-	def __init__(self, map_shape):
+	def __init__(self, map_shape, env_id=0):
 		super(Sc2Env, self).__init__()
 		# Define action and observation space
 		# They must be gym.spaces objects
 		# Example when using discrete actions:
 		self.map_shape = map_shape
+		self.env_id = env_id
+		self.saved_rwd_action_str = f'state_rwd_action{env_id}.pkl'
 		self.action_space = spaces.Discrete(6)
 		self.observation_space = spaces.Box(low=0, high=255,
 											shape=self.map_shape , dtype=np.uint8)
@@ -24,7 +28,7 @@ class Sc2Env(gym.Env):
 		while wait_for_action:
 			#print("waiting for action")
 			try:
-				with open('state_rwd_action.pkl', 'rb') as f:
+				with open(self.saved_rwd_action_str, 'rb') as f:
 					state_rwd_action = pickle.load(f)
 
 					if state_rwd_action['action'] is not None:
@@ -34,7 +38,7 @@ class Sc2Env(gym.Env):
 						#print("Needs action")
 						wait_for_action = False
 						state_rwd_action['action'] = action
-						with open('state_rwd_action.pkl', 'wb') as f:
+						with open(self.saved_rwd_action_str, 'wb') as f:
 							# now we've added the action.
 							pickle.dump(state_rwd_action, f)
 			except Exception as e:
@@ -45,8 +49,8 @@ class Sc2Env(gym.Env):
 		wait_for_state = True
 		while wait_for_state:
 			try:
-				if os.path.getsize('state_rwd_action.pkl') > 0:
-					with open('state_rwd_action.pkl', 'rb') as f:
+				if os.path.getsize(self.saved_rwd_action_str) > 0:
+					with open(self.saved_rwd_action_str, 'rb') as f:
 						state_rwd_action = pickle.load(f)
 						if state_rwd_action['action'] is None:
 							#print("No state yet")
@@ -64,7 +68,7 @@ class Sc2Env(gym.Env):
 				observation = map
 				# if still failing, input an ACTION, 3 (scout)
 				data = {"state": map, "reward": 0, "action": 3, "done": False}  # empty action waiting for the next one!
-				with open('state_rwd_action.pkl', 'wb') as f:
+				with open(self.saved_rwd_action_str, 'wb') as f:
 					pickle.dump(data, f)
 
 				state = map
@@ -82,9 +86,11 @@ class Sc2Env(gym.Env):
 		map = np.zeros(self.map_shape, dtype=np.uint8)
 		observation = map
 		data = {"state": map, "reward": 0, "action": None, "done": False}  # empty action waiting for the next one!
-		with open('state_rwd_action.pkl', 'wb') as f:
+		with open(self.saved_rwd_action_str, 'wb') as f:
 			pickle.dump(data, f)
 
 		# run incredibot-sct.py non-blocking:
-		subprocess.Popen(['python3', 'incredibot-sct.py'])
+		subprocess.Popen(['python3', 'incredibot_sct.py', '-i', str(self.env_id)])
+		# main()
+		print("env_id: ", self.env_id)
 		return observation  # reward, done, info can't be included

@@ -31,7 +31,7 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
             try:
                 with open('state_rwd_action.pkl', 'rb') as f:
                     state_rwd_action = pickle.load(f)
-
+                    # print("state_rwd_action: ", state_rwd_action.shape)
                     if state_rwd_action['action'] is None:
                         #print("No action yet")
                         no_action = True
@@ -323,14 +323,46 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
         with open('state_rwd_action.pkl', 'wb') as f:
             pickle.dump(data, f)
 
+# def main():
+
+
+#     result = run_game(  # run_game is a function that runs the game.
+#         maps.get(map_name),
+#         # maps.get("2000AtmospheresAIE"), # the map we are playing on
+#         [Bot(Race.Protoss, IncrediBot()), # runs our coded bot, protoss race, and we pass our bot object 
+#         Computer(Race.Zerg, Difficulty.Hard)], # runs a pre-made computer agent, zerg race, with a hard difficulty.
+#         realtime=False, # When set to True, the agent is limited in how long each step can take to process.
+#     )
+
+
+#     if str(result) == "Result.Victory":
+#         rwd = 500
+#     else:
+#         rwd = -500
+
+#     with open("results.txt","a") as f:
+#         f.write(f"{result}\n")
+
+
+#     map = np.zeros(map_shape, dtype=np.uint8)
+#     observation = map
+#     data = {"state": map, "reward": rwd, "action": None, "done": True}  # empty action waiting for the next one!
+#     with open('state_rwd_action.pkl', 'wb') as f:
+#         pickle.dump(data, f)
+
+#     cv2.destroyAllWindows()
+#     cv2.waitKey(1)
+#     time.sleep(3)
+#     sys.exit()
         
+
 
 
 result = run_game(  # run_game is a function that runs the game.
     maps.get(map_name),
     # maps.get("2000AtmospheresAIE"), # the map we are playing on
     [Bot(Race.Protoss, IncrediBot()), # runs our coded bot, protoss race, and we pass our bot object 
-     Computer(Race.Zerg, Difficulty.Hard)], # runs a pre-made computer agent, zerg race, with a hard difficulty.
+    Computer(Race.Zerg, Difficulty.Hard)], # runs a pre-made computer agent, zerg race, with a hard difficulty.
     realtime=False, # When set to True, the agent is limited in how long each step can take to process.
 )
 

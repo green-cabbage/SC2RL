@@ -67,7 +67,14 @@ class Sc2Env(gym.Env):
 				map = np.zeros(self.map_shape, dtype=np.uint8)
 				observation = map
 				# if still failing, input an ACTION, 3 (scout)
-				data = {"state": map, "reward": 0, "action": 3, "done": False}  # empty action waiting for the next one!
+				data = {
+					"state": map, 
+					"reward": 0, 
+					"action": 3, 
+					"done": False,
+					"worker_count": state_rwd_action["worker_count"]
+					}  # empty action waiting for the next one!
+				print("worker_count: ", state_rwd_action["worker_count"])
 				with open(self.saved_rwd_action_str, 'wb') as f:
 					pickle.dump(data, f)
 
@@ -85,7 +92,13 @@ class Sc2Env(gym.Env):
 		print("RESETTING ENVIRONMENT!!!!!!!!!!!!!")
 		map = np.zeros(self.map_shape, dtype=np.uint8)
 		observation = map
-		data = {"state": map, "reward": 0, "action": None, "done": False}  # empty action waiting for the next one!
+		data = {
+			"state": map, 
+			"reward": 0, 
+			"action": None, 
+			"done": False,
+			"worker_count": 0
+			}  # empty action waiting for the next one!
 		with open(self.saved_rwd_action_str, 'wb') as f:
 			pickle.dump(data, f)
 

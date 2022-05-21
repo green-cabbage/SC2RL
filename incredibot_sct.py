@@ -293,6 +293,8 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
         # show map with opencv, resized to be larger:
         # horizontal flip:
 
+        # imshow shows the visual situation, but probably takes 
+        # more latency
         cv2.imshow('map',cv2.flip(cv2.resize(map, None, fx=4, fy=4, interpolation=cv2.INTER_NEAREST), 0))
         cv2.waitKey(1)
 
@@ -301,7 +303,9 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
             cv2.imwrite(f"replays/{int(time.time())}-{iteration}.png", map)
 
 
-
+        # set total worker count to previous worker count in case
+        # there is an exception case
+        total_worker_count = state_rwd_action['worker_count']
         reward = 0
 
         try:
@@ -315,50 +319,39 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
                         reward += 0.015  
                         attack_count += 1
 
+            # negative reward for losing workers to be a small portion of
+            # positive reward of voidrays attacking, bc losing few workers
+            # is fine, but when you lose a bunch of them, that's not good
+            prev_total_worker_count = total_worker_count
+            total_worker_count = len(self.units(UnitTypeId.PROBE))
+            # if we lose several workers, we give negative reward
+            worker_loss = (total_worker_count - prev_total_worker_count)
+            if worker_loss < -2: #losing one worker is just from scouting
+                print("woker loss: ", worker_loss)
+                worker_loss_rwd = 0.00015
+                reward -= worker_loss_rwd*worker_loss
+
+
         except Exception as e:
             print("reward",e)
+            print("exception!")
             reward = 0
 
         
-        if iteration % 1000 == 0:
+        if iteration % 100 == 0:
             print(f"Iter: {iteration}. RWD: {reward}. VR: {self.units(UnitTypeId.VOIDRAY).amount}")
 
         # write the file: 
-        data = {"state": map, "reward": reward, "action": None, "done": False}  # empty action waiting for the next one!
+        data = {
+            "state": map, 
+            "reward": reward, 
+            "action": None, 
+            "done": False,
+            "worker_count": total_worker_count
+            }  # empty action waiting for the next one!
 
         with open(saved_rwd_action_str, 'wb') as f:
             pickle.dump(data, f)
-
-def main():
-    result = run_game(  # run_game is a function that runs the game.
-        maps.get(map_name),
-        # maps.get("2000AtmospheresAIE"), # the map we are playing on
-        [Bot(Race.Protoss, IncrediBot()), # runs our coded bot, protoss race, and we pass our bot object 
-        Computer(Race.Zerg, Difficulty.Hard)], # runs a pre-made computer agent, zerg race, with a hard difficulty.
-        realtime=False, # When set to True, the agent is limited in how long each step can take to process.
-    )
-
-
-    if str(result) == "Result.Victory":
-        rwd = 500
-    else:
-        rwd = -500
-
-    with open(f"results{agent_idx}.txt","a") as f:
-        f.write(f"{result}\n")
-
-
-    map = np.zeros(map_shape, dtype=np.uint8)
-    observation = map
-    data = {"state": map, "reward": rwd, "action": None, "done": True}  # empty action waiting for the next one!
-    with open(saved_rwd_action_str, 'wb') as f:
-        pickle.dump(data, f)
-
-    cv2.destroyAllWindows()
-    cv2.waitKey(1)
-    time.sleep(3)
-    sys.exit()
-        
 
 
 
@@ -383,7 +376,13 @@ with open(f"results.txt","a") as f:
 
 map = np.zeros(map_shape, dtype=np.uint8)
 observation = map
-data = {"state": map, "reward": rwd, "action": None, "done": True}  # empty action waiting for the next one!
+data = {
+    "state": map,
+    "reward": rwd, 
+    "action": None, 
+    "done": True,
+    "worker_count": 0
+    }  # empty action waiting for the next one!
 with open(saved_rwd_action_str, 'wb') as f:
     pickle.dump(data, f)
 

@@ -1,0 +1,29 @@
+version: "3"
+services:
+  sc2rl:
+    image: sc2rl
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: '/bin/bash'
+    tty: true
+    stdin_open: true
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - type: "bind"
+        source: "./app"
+        target: "/app"
+      - type: "bind"
+        source: /tmp/.X11-unix
+        target: /tmp/.X11-unix
+      - type: "bind"
+        source: "$HOME/.Xauthority"
+        target: "/root/.Xauthority"
+    network_mode: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            capabilities: [gpu]

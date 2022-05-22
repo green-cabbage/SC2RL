@@ -13,7 +13,7 @@ import wandb
 def make_env(map_shape, env_id, seed=0):
     """
     Utility function for multiprocessed env.
-    
+
     :param env_id: (str) the environment ID
     :param seed: (int) the inital seed for RNG
     :param rank: (int) index of the subprocess
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 		# Create the vectorized environment
 		env = SubprocVecEnv([make_env(map_shape, i) for i in range(num_cpu)])
 
-	
+
 	start_from_scratch = True
 	if start_from_scratch:
 		print("starting from scratch")
@@ -70,8 +70,8 @@ if __name__ == '__main__':
 		iters=86
 		model_name = "1653074223_cpu1"
 		models_dir = f"models/{model_name}/"
-		
-		
+
+
 
 	logdir = f"logs/{model_name}/"
 	conf_dict = {"Model": "v1",
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 	if not os.path.exists(logdir):
 		os.makedirs(logdir)
 
-	model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=logdir, device="cuda:1")
+	model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=logdir, device="cuda:0")
 	if not start_from_scratch:
 		print("loading model")
 		model.load(f"{models_dir}/1720000_Iter{iters}")
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 	with open(f"time.txt","w") as f: #prev on w mode
 			f.write(f"cpu_count:{num_cpu}\n")
 
-	
+
 	while True:
 		print("On iteration: ", iters)
 		#save date

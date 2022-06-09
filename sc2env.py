@@ -10,14 +10,15 @@ import os
 
 class Sc2Env(gym.Env):
 	"""Custom Environment that follows gym interface"""
-	def __init__(self, map_shape, env_id=0):
+	def __init__(self, map_shape, run_id=0, env_id=0):
 		super(Sc2Env, self).__init__()
 		# Define action and observation space
 		# They must be gym.spaces objects
 		# Example when using discrete actions:
 		self.map_shape = map_shape
+		self.run_id = run_id
 		self.env_id = env_id
-		self.saved_rwd_action_str = f'state_rwd_action{env_id}.pkl'
+		self.saved_rwd_action_str = f'state_rwd_action{run_id}_{env_id}.pkl'
 		self.action_space = spaces.Discrete(6)
 		self.observation_space = spaces.Box(low=0, high=255,
 											shape=self.map_shape , dtype=np.uint8)
@@ -103,7 +104,6 @@ class Sc2Env(gym.Env):
 			pickle.dump(data, f)
 
 		# run incredibot-sct.py non-blocking:
-		subprocess.Popen(['python3', 'incredibot_sct.py', '-i', str(self.env_id)])
-		# main()
-		print("env_id: ", self.env_id)
+		subprocess.Popen(['python3', 'incredibot_sct.py', '-i', f"{self.run_id}_{self.env_id}"])
+		print(f"Process number: {self.run_id}_{self.env_id}")
 		return observation  # reward, done, info can't be included

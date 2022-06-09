@@ -9,8 +9,9 @@ import time
 from datetime import datetime
 from wandb.integration.sb3 import WandbCallback
 import wandb
+import argparse
 
-def make_env(map_shape, env_id, seed=0):
+def make_env(map_shape, run_id, env_id, seed=0):
     """
     Utility function for multiprocessed env.
     
@@ -19,7 +20,7 @@ def make_env(map_shape, env_id, seed=0):
     :param rank: (int) index of the subprocess
     """
     def _init():
-        env = Sc2Env(map_shape, env_id=env_id)
+        env = Sc2Env(map_shape, run_id=run_id, env_id=env_id)
         # Important: use a different seed for each environment
         env.seed(seed)
         return env
@@ -49,15 +50,20 @@ if __name__ == '__main__':
 	map_name ="KingsCoveLE"
 	map_shape = (176, 176, 3) # map shape for KingsCoveLE
 
+	parser = argparse.ArgumentParser()
+	parser.add_argument ('-i', '--input' , help='Input ')
+	args = parser.parse_args()
+	run_id  = args.input
+
 	num_cpu = 1 # Number of processes to use
 	if num_cpu==1: # single thread/process
-		env = Sc2Env(map_shape)
+		env = Sc2Env(map_shape, run_id=run_id)
 	else:# multi thread/process
 		# Create the vectorized environment
-		env = SubprocVecEnv([make_env(map_shape, i) for i in range(num_cpu)])
+		env = SubprocVecEnv([make_env(map_shape, run_id, i) for i in range(num_cpu)])
 
 	
-	start_from_scratch = False
+	start_from_scratch = True
 	if start_from_scratch:
 		print("starting from scratch")
 		iters = 0
@@ -84,7 +90,7 @@ if __name__ == '__main__':
 	if not os.path.exists(logdir):
 		os.makedirs(logdir)
 
-	model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=logdir, device="cuda:1")
+	model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=logdir, device="cuda:0")
 	if not start_from_scratch:
 		print("loading model")
 		model.load(f"{models_dir}/460000_Iter{iters}")

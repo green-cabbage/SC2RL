@@ -295,7 +295,7 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
 
         # imshow shows the visual situation, but probably takes 
         # more latency
-        # cv2.imshow('map',cv2.flip(cv2.resize(map, None, fx=4, fy=4, interpolation=cv2.INTER_NEAREST), 0))
+        cv2.imshow('map',cv2.flip(cv2.resize(map, None, fx=4, fy=4, interpolation=cv2.INTER_NEAREST), 0))
         cv2.waitKey(1)
 
         if SAVE_REPLAY:
@@ -327,7 +327,7 @@ class IncrediBot(BotAI): # inhereits from BotAI (part of BurnySC2)
             # if we lose several workers, we give negative reward
             worker_loss = (total_worker_count - prev_total_worker_count)
             if worker_loss < -2: #losing one worker is just from scouting
-                print(f"woker loss: {worker_loss}. Iter: {iteration}")
+                # print(f"woker loss: {worker_loss}. Iter: {iteration}")
                 worker_loss_rwd = 0.00015
                 reward -= worker_loss_rwd*worker_loss
 

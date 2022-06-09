@@ -57,7 +57,7 @@ if __name__ == '__main__':
 		env = SubprocVecEnv([make_env(map_shape, i) for i in range(num_cpu)])
 
 	
-	start_from_scratch = True
+	start_from_scratch = False
 	if start_from_scratch:
 		print("starting from scratch")
 		iters = 0
@@ -67,8 +67,8 @@ if __name__ == '__main__':
 
 	else: # continue from where we left off
 		print("continuing from where we left off")
-		iters=86
-		model_name = "1653074223_cpu1"
+		iters=23
+		model_name = "1653148259_cpu1"
 		models_dir = f"models/{model_name}/"
 		
 		
@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=logdir, device="cuda:1")
 	if not start_from_scratch:
 		print("loading model")
-		model.load(f"{models_dir}/1720000_Iter{iters}")
+		model.load(f"{models_dir}/460000_Iter{iters}")
 
 	TIMESTEPS = 20000
 	with open(f"time.txt","w") as f: #prev on w mode
